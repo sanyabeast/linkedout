@@ -9,8 +9,8 @@ let constants = {
   task_debounce_timeout: 250,
   task_repeat_delay: 600,
   task_repeat_random_delay: 666,
-  default_scroll_duration: 0.250,
-  requested_scroll_timescale: 3,
+  default_scroll_duration: 1,
+  requested_scroll_timescale: 2,
   test_task_count: 10
 }
 
@@ -276,7 +276,7 @@ function quick_scroll ( scale, on_complete ) {
   TweenMax.fromTo( document.body.parentElement, constants.default_scroll_duration * scale, {
     scrollTop: document.body.parentElement.scrollTop
   }, {
-    scrollTop: document.body.parentElement.scrollHeight * 2,
+    scrollTop: document.body.parentElement.scrollHeight,
     repeat: 0,
     onComplete: ()=>{
       on_complete && on_complete()
@@ -308,7 +308,7 @@ function run_task( data ) {
 function collect_state () {
   if ( window.location.href !== state.url ) {
     state.url = window.location.href
-    quick_scroll()
+    quick_scroll(2)
   }
 
   console.log("collecting state... ")
@@ -411,7 +411,7 @@ function collect_state () {
 collect_state = _.debounce(collect_state, 250)
 
 document.addEventListener( "DOMContentLoaded", ()=>{
-  quick_scroll()
+  quick_scroll(2)
   collect_state ()
  
 } )
