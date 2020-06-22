@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      html{
+        background-color: #030c19;
+        padding: 16px 8px;
+        font-weight: 400;
+      }
+
+      * {
+        box-sizing: border-box;
+        outline: none;
+        touch-action: manipulation;
+        text-transform: uppercase;
+      }
+
+      .main {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+        grid-gap: 8px;
+      }
+
+      .main .container {
+        background:#861e19;
+        display: flex;
+        flex-direction: column;
+        border: 3px dotted #030c19;
+        padding: 16px 8px;
+        align-items: stretch;
+      }
+
+      .main .container .info {
+        color: #eee;
+        font-size: 13px;
+        font-family: monospace;
+        margin-bottom: 10px;
+      }
+
+      .main .container .info .item {
+        color: #eee;
+        font-size: 11px;
+        font-family: monospace;
+        margin-bottom: 2px;
+      }
+
+      .main .container .buttons {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 4px;
+      }
+      .main .container .buttons button {
+        width: 100%;
+      }
+
+      .main .container .info .item:before {
+        content: " - "
+      }
+
+      .main .container button {
+        font-family: monospace;
+        font-weight: 900;
+        background: black;
+        border: 3px dotted #4c200e;
+        padding: 8px;
+        color: #9c9c9c;
+        cursor: pointer;
+        font-size: 13px;
+        height: 100%;
+      }
+
+      .main .container button:hover {
+        background: #271212;
+      }
+
+      .main .overlay {
+        position: absolute;
+        display: flex;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: #00000075;
+        backdrop-filter: blur(10px);
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+
+      }
+
+      .main .overlay .caption {
+        font-weight: 900;
+        color: #ddd;
+        font-size: 14px;
+
+      }
+
+      .main .overlay .loader {
+        width: 100px;
+        height: 100px;
+        border: 2px solid #fff;
+        margin: 16px 0;
+        position: relative;
+        opacity: 0.75;
+      }
+
+      .main .overlay .loader .loader-gizmo {
+        background-color: #aaa;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        transition: width 0.15s ease;
+      }
+
+    </style>
+    <style type="text/css">
+      ::-webkit-scrollbar {
+        width: 2px;
+        height: 2px;
+      }
+      ::-webkit-scrollbar-button {
+        width: 0px;
+        height: 0px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #ad4608;
+        border: 0px none #906006;
+        border-radius: 50px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #906006;
+      }
+      ::-webkit-scrollbar-thumb:active {
+        background: #000000;
+      }
+      ::-webkit-scrollbar-track {
+        background: #666666;
+        border: 0px none #906006;
+        border-radius: 50px;
+      }
+      ::-webkit-scrollbar-track:hover {
+        background: #666666;
+      }
+      ::-webkit-scrollbar-track:active {
+        background: #333333;
+      }
+      ::-webkit-scrollbar-corner {
+        background: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main" class="main"></div>
+  </body>
+  <script>
+
+    Vue.component('button-counter', {
+      data: function () {
+        return {
+          count: 0
+        }
+      },
+      template: '<button v-on:click="count++">Счётчик кликов — {{ count }}</button>'
+    })
+
+    let app = new Vue({ 
+      el: '#main',
+      template: `
+        <div class="main" >
+          <div class="container main_info" style="grid-column-end: 3; grid-column-start: 1; ">
+            <div class="info">
+              Информация
+            </div>
+            <div class="info">
+              <div class="item page_type" v-html="info.page_type"></div>
+              <div class="item invitations" v-html="info.invitations" title="Количество заявок, которые можно принять"></div>
+              <div class="item newcomers" v-html="info.newcomers" title="Количество людей, с которыми можно устновить контакт" ></div>
+              <div class="item skillz" v-html="info.skillz" title="Количество не апвоутнутых скиллов"></div>
+              <div class="item posts" v-html="info.posts" title="Количество постов, которые можно лайкнуть"></div>
+            </div>
+            <div class="buttons">
+              <button class="go_to_main">На главную</button>
+              <button class="go_to_main" @click="send_task('quick_scroll')" title="Проскроллить вниз страницы, для того, чтобы инициировать подгрузку">Проскроллить</button>
+              <button class="go_to_main" @click="send_message({ type: 'back' })" title="То же, что и браузерная кнопка 'Назад'">Назад</button>
+              <button class="go_to_main" @click="send_message({ type: 'reload' })" title="То же, что и браузерная кнопка 'Обновить'">Релоад</button>
+              <button class="go_to_main" @click="send_task('next_page')" title="Переход на слудующую страницу - работает, только там, где есть пагинация">Следующая страница</button>
+            </div>
+          </div>
+          <div class="container" style="background-color: #8e4522">
+            <div class="info">Приглашения</div>
+            <button class="accept_all_invitations" @click="send_task('accept_all_invitations')" v-html=" 'Принять все приглашения (' + state.invitations + ')' "></button>
+          </div>
+          <div class="container" style="background-color: #295a3f">
+            <div class="info">Установить контакт</div>
+            <button class="setup_all_contacts" @click="send_task('setup_all_contacts')" v-html=" 'Установить связь со всеми контактами (' + state.newcomers + ')' "></button>
+          </div>
+          <div class="container">
+            <div class="info">Скиллы</div>
+            <button class="upvote_all_skillz" @click="send_task('upvote_all_skillz')" v-html=" 'Апвоутнуть все скиллы (' + state.skillz + ')' "></button>
+          </div>  
+          <div class="container" style="background-color: #453158">
+            <div class="info">Фид</div>
+            <button class="like_all_posts" @click="send_task('like_all_posts')" v-html=" 'Лайкнуть все посты (' + state.posts + ')' ">Лайкнуть все посты</button>
+          </div>  
+          <div class="overlay" v-if="task.active">
+            <div class="caption" v-html="'Выполняется задание \\n' + task.id "></div>  
+            <div class="loader">
+              <div class="loader-gizmo" v-bind:style="{ height: task.progress + '%' }"></div>  
+            </div>
+          </div>
+        </div>
+      `,
+      data () {
+        return {
+          task: {
+            progress: 45
+          },
+          state: {
+            newcomers: 0,
+            invitations: 0,
+            skillz: 0,
+            posts: 0
+          },
+          info: {
+            page_type: "",
+            invitations: "",
+            newcomers: "",
+            skillz: "",
+            posts: "",
+          }
+        }
+      },
+      mounted () {
+        console.log("mounted")
+        this.send_message( {
+          type: "reload"
+        } )
+      },
+      methods: {
+        send_task ( task_type ) {
+          send_message( {
+            type: "task",
+            task_type: task_type,
+            task_id: `${task_type}_${makeid(16)}`
+          } )
+        },
+        send_message ( data ) {
+          window.send_message( {
+            ...data,
+            task_id: makeid(32)
+          } )
+        },
+        update_state ( params ) {
+          this.state = params
+          this.info.page_type = `Тип страницы - ${ params.page_type }`
+          this.info.newcomers = `Контактов для установления - ${params.newcomers}`
+          this.info.invitations = `Входящих заявок - ${params.invitations}`
+          this.info.skillz = `Скиллов для апвоута - ${params.skillz}`
+          this.info.posts = `Постов для апвоута - ${params.posts}`
+          console.log( params )
+        },
+        update_task_state ( params ) {
+          this.task.id = params.task_id
+          this.task.progress = params.progress * 100
+          if ( params.completed === true ) {
+            this.task.active = false
+          } else {
+            this.task.active = true
+          }
+        }
+      }
+     })
+
+    window.update_state = function ( params ) {
+      app.update_state( params )
+    }
+
+    window.update_task_state = function ( params ) {
+      app.update_task_state( params )
+    }
+  </script>
+</html>
