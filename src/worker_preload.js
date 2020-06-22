@@ -165,8 +165,10 @@ let tasks = {
       let button = document.querySelector(".artdeco-pagination [aria-label=Далее]")
       if ( button ) {
         fire_event( button, "click" )
-        send_task_state(data.task_id, true, 1)
       }
+
+      send_task_state(data.task_id, true, 1)
+
     }, constants.task_debounce_timeout)
   }
 }
