@@ -10,7 +10,7 @@ let constants = {
   task_repeat_delay: 600,
   task_repeat_random_delay: 666,
   default_scroll_duration: 1,
-  requested_scroll_timescale: 2,
+  requested_scroll_timescale: 0.75,
   test_task_count: 10
 }
 
@@ -308,7 +308,7 @@ function run_task( data ) {
 function collect_state () {
   if ( window.location.href !== state.url ) {
     state.url = window.location.href
-    quick_scroll(2)
+    quick_scroll(1.25)
   }
 
   console.log("collecting state... ")
@@ -411,7 +411,7 @@ function collect_state () {
 collect_state = _.debounce(collect_state, 250)
 
 document.addEventListener( "DOMContentLoaded", ()=>{
-  quick_scroll(2)
+  quick_scroll(1.25)
   collect_state ()
  
 } )
