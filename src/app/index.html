@@ -15,6 +15,42 @@
         text-transform: uppercase;
       }
 
+      @keyframes shake {
+        0% {
+          transform: translate(-1px, -1px);
+        }
+        25% {
+          transform: translate(1px, -1px);
+        }
+        50% {
+          transform: translate(-1px, 1px);
+        }
+        75% {
+          transform: translate(1px, 1px);
+        }
+        100% {
+          transform: translate(-1px, -1px);
+        }
+      }
+
+      @keyframes shake_2 {
+        0% {
+          transform: translate(1px, -1px);
+        }
+        25% {
+          transform: translate(-1px, -1px);
+        }
+        50% {
+          transform: translate(-1px, -1px);
+        }
+        75% {
+          transform: translate(-1px, 1px);
+        }
+        100% {
+          transform: translate(1px, -1px);
+        }
+      }
+
       .main {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -29,6 +65,7 @@
         border: 3px dotted #030c19;
         padding: 16px 8px;
         align-items: stretch;
+        animation: shake 30s ease infinite;
       }
 
       .main .container .info {
@@ -36,6 +73,7 @@
         font-size: 13px;
         font-family: monospace;
         margin-bottom: 10px;
+        animation: shake 15s ease infinite;
       }
 
       .main .container .info .item {
@@ -68,6 +106,7 @@
         cursor: pointer;
         font-size: 13px;
         height: 100%;
+        animation: shake_2 30s ease infinite;
       }
 
       .main .container button:hover {
@@ -82,11 +121,18 @@
         width: 100%;
         height: 100%;
         background: #00000075;
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(50px);
         justify-content: center;
         align-items: center;
         flex-direction: column;
+        transform: translateX(-100%);
+        transition: transform 0.5s ease, opacity 0.5s ease;
+        opacity: 0;
+      }
 
+      .main .overlay.active {
+        transform: translateX(0);
+        opacity: 1;
       }
 
       .main .overlay .caption {
@@ -110,7 +156,21 @@
         position: absolute;
         bottom: 0;
         width: 100%;
-        transition: width 0.15s ease;
+        transition: height 0.6s ease;
+      }
+
+      
+
+      .main .overlay button {
+
+        background: #6969697a;
+        padding: 14px;
+        color: #fff;
+        font-family: monospace;
+        border: 2px dotted #fff;
+        cursor: pointer;
+        margin-top: 24px;
+
       }
 
     </style>
@@ -203,18 +263,20 @@
             <div class="info">Фид</div>
             <button class="like_all_posts" @click="send_task('like_all_posts')" v-html=" 'Лайкнуть все посты (' + state.posts + ')' ">Лайкнуть все посты</button>
           </div>  
-          <div class="overlay" v-if="task.active">
+          <div class="overlay" v-bind:class="{active: task.active} ">
             <div class="caption" v-html="'Выполняется задание \\n' + task.id "></div>  
             <div class="loader">
               <div class="loader-gizmo" v-bind:style="{ height: task.progress + '%' }"></div>  
             </div>
+            <button @click="send_message({ type: 'cancel_task' })">Отменить задание</button>
           </div>
         </div>
       `,
       data () {
         return {
           task: {
-            progress: 45
+            progress: 45,
+            active: false
           },
           state: {
             newcomers: 0,
@@ -262,7 +324,7 @@
         },
         update_task_state ( params ) {
           this.task.id = params.task_id
-          this.task.progress = params.progress * 100
+          this.task.progress = Math.min( (params.progress + 0.1) * 100, 100 )
           if ( params.completed === true ) {
             this.task.active = false
           } else {

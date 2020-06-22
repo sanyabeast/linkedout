@@ -45,6 +45,12 @@ function create_windows () {
     }
   })
 
+  worker_window.webContents.on('new-window', function(e, url) {
+    e.preventDefault();
+    // console.log()
+    worker_window.loadURL( url )
+  });
+
   // worker_window.maximize()
   worker_window.loadURL( "https://www.linkedin.com/" )
   // worker_window.openDevTools()

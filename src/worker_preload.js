@@ -10,8 +10,11 @@ let constants = {
   task_repeat_delay: 600,
   task_repeat_random_delay: 666,
   default_scroll_duration: 0.250,
-  requested_scroll_timescale: 3
+  requested_scroll_timescale: 3,
+  test_task_count: 10
 }
+
+let repeat_canceled = false
 
 let state = window.state = {
   url: window.location.href,
@@ -27,6 +30,28 @@ let tasks = {
       window.open( data.url, "_self" )
       send_task_state(data.task_id, true, 1)
     }
+  },
+  test_task: {
+    callback: _.debounce(function( data ){
+      console.log(`test task ( count to ${constants.test_task_count} )`)
+      repeat( {
+        callback: ( i )=>{
+          console.log(i)
+          send_task_state(data.task_id, false, i / constants.test_task_count)
+        },
+        on_complete: ()=>{
+          send_message({
+            type: "task_complete",
+            task_id: data.task_id
+          })
+
+          send_task_state(data.task_id, true, 1)
+        },
+        count: constants.test_task_count,
+        delay: constants.task_repeat_delay,
+        rand_delay: constants.task_repeat_random_delay
+      } )
+    }, constants.task_debounce_timeout)
   },
   accept_all_invitations: {
     callback: _.debounce(function( data ){
@@ -149,7 +174,15 @@ let tasks = {
 ipc.on('message', (event, message) => {
     switch ( message.type ) {
       case "task":
-        run_task( message )
+        try {
+          run_task( message )
+        } catch ( err ) {
+          console.warn( err )
+          send_task_state( message.task_id, true, 1 )
+        }
+      break;
+      case "cancel_task":
+        repeat_canceled = true
       break;
     }
 })
@@ -186,11 +219,20 @@ function repeat(params){
   let delay = params.delay || 0
   let rand_delay = params.rand_delay || 0
 
+  
   if ( count === 0 ) {
     on_complete()
     return
   } else {
+    repeat_canceled = false
     function run () {
+      if ( repeat_canceled === true ) {
+        on_complete();
+        console.log("repeat canceled")
+        repeat_canceled = false
+        return;
+      }
+
       console.log(`repeating task (${current + 1}/${count})`)
       
       try {
@@ -198,7 +240,7 @@ function repeat(params){
       } catch ( err ) {
         console.warn( err )
       }
-      
+
       current++
         if ( count === current ) {
           on_complete()
