@@ -7,8 +7,8 @@
 ```npm run launch```
 
 ## Демо
-[Скачать демо](https://github.com/sanyabeast/linkedout/raw/master/demo.mp4)
-[Скачать демо 2](https://github.com/sanyabeast/linkedout/raw/master/demo2.mp4)
+- [Скачать демо](https://github.com/sanyabeast/linkedout/raw/master/demo.mp4)
+- [Скачать демо 2](https://github.com/sanyabeast/linkedout/raw/master/demo2.mp4)
 
 ## Дополнительно
 - Скрипт работает с контентом на странице, т.е. нажимет кнопочки
