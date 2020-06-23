@@ -5,6 +5,8 @@
 
 ## Запуск
 ```npm run launch```
+- Логинимся
+- Фармим лут
 
 ## Демо
 - [Скачать демо](https://github.com/sanyabeast/linkedout/raw/master/demo.mp4)
