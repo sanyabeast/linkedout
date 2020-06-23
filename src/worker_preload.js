@@ -130,6 +130,29 @@ let tasks = {
       } )
     }, constants.task_debounce_timeout)
   },
+  like_all_comments: {
+    callback: _.debounce(function( data ){
+      console.log(`upvoting all skillz (${ state.comments.length })`)
+      let comments = state.comments.slice()
+      repeat( {
+        callback: ( i )=>{
+          let action_button = comments[ i ].action_button
+          fire_event( action_button, "click" )
+          send_task_state(data.task_id, false, i/comments.length)
+        },
+        on_complete: ()=>{
+          send_message({
+            type: "task_complete",
+            task_id: data.task_id
+          })
+          send_task_state(data.task_id, true, 1)
+        },
+        count: comments.length,
+        delay: constants.task_repeat_delay,
+        rand_delay: constants.task_repeat_random_delay
+      } )
+    }, constants.task_debounce_timeout)
+  },
   like_all_posts: {
     callback: _.debounce(function( data ){
       console.log(`liking all posts (${ state.posts.length })`)
@@ -392,12 +415,22 @@ function collect_state () {
     }
   } )
 
+  let comments = []
+  let comment_els = document.querySelectorAll("[data-control-name=comment_like_toggle][aria-pressed=false]")
+  _.forEach( comment_els, ( el, index )=>{
+    let action_button = el
+    comments.push( {
+      card_el: el,
+      action_button: el
+    } )
+  } )
 
   state.page_type = page_type
   state.invitations = invitations
   state.newcomers = newcomers
   state.skillz = skillz
   state.posts = posts
+  state.comments = comments
 
   send_message({
     type: "state",
@@ -406,7 +439,8 @@ function collect_state () {
       invitations: state.invitations.length,
       newcomers: state.newcomers.length,
       skillz: state.skillz.length,
-      posts: state.posts.length
+      posts: state.posts.length,
+      comments: state.comments.length
     }
   })
   

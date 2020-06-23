@@ -90,6 +90,13 @@
         grid-template-columns: repeat(3, 1fr);
         grid-gap: 4px;
       }
+
+      .main .container.feed .buttons {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 4px;
+      }
+
       .main .container .buttons button {
         width: 100%;
       }
@@ -257,6 +264,7 @@
               <div class="item newcomers help" v-html="info.newcomers" title="Количество людей, с которыми можно устновить контакт" ></div>
               <div class="item skillz help" v-html="info.skillz" title="Количество не апвоутнутых скиллов"></div>
               <div class="item posts help" v-html="info.posts" title="Количество постов, которые можно лайкнуть"></div>
+              <div class="item posts help" v-html="info.comments" title="Количество комментов, которые можно лайкнуть"></div>
             </div>
             <div class="buttons">
               <button class="go_to_main">На главную</button>
@@ -283,9 +291,12 @@
             <div class="info">Скиллы</div>
             <button class="upvote_all_skillz" @click="send_task('upvote_all_skillz')" v-html=" 'Апвоутнуть все скиллы (' + state.skillz + ')' "></button>
           </div>  
-          <div class="container" style="background-color: #453158">
+          <div class="container feed" style="background-color: #453158">
             <div class="info">Фид</div>
-            <button class="like_all_posts" @click="send_task('like_all_posts')" v-html=" 'Лайкнуть все посты (' + state.posts + ')' ">Лайкнуть все посты</button>
+            <div class="buttons">
+              <button class="like_all_posts" @click="send_task('like_all_posts')" v-html=" 'Лайкнуть все посты (' + state.posts + ')' ">Лайкнуть все посты</button>
+              <button class="like_all_comments" @click="send_task('like_all_comments')" v-html=" 'Лайкнуть все комменты (' + state.comments + ')' ">Лайкнуть все комменты</button>
+            </div>
           </div>  
           <div class="overlay" v-bind:class="{active: task.active} ">
             <div class="caption" v-html="'Выполняется задание \\n' + task.id "></div>  
@@ -307,7 +318,8 @@
             newcomers: 0,
             invitations: 0,
             skillz: 0,
-            posts: 0
+            posts: 0,
+            comments: 0
           },
           info: {
             page_type: "",
@@ -315,6 +327,7 @@
             newcomers: "",
             skillz: "",
             posts: "",
+            comments: ""
           }
         }
       },
@@ -351,6 +364,7 @@
           this.info.invitations = `Входящих заявок - ${params.invitations}`
           this.info.skillz = `Скиллов для апвоута - ${params.skillz}`
           this.info.posts = `Постов для апвоута - ${params.posts}`
+          this.info.comments = `Комментов для апвоута - ${params.comments}`
           console.log( params )
         },
         update_task_state ( params ) {
