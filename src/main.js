@@ -11,7 +11,7 @@ function create_windows () {
   const main_window = new BrowserWindow({
     title: "LIQUID BURGER TECHNOLOGY",
     width: 600,
-    height: 600,
+    height: 720,
     nodeIntegration: true,
     nodeIntegrationInWorker : true,
     nodeIntegrationInSubFrames: true,

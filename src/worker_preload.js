@@ -7,11 +7,12 @@ window._ = _
 
 let constants = {
   task_debounce_timeout: 250,
-  task_repeat_delay: 600,
-  task_repeat_random_delay: 666,
+  task_repeat_delay: 500,
+  task_repeat_random_delay: 500,
   default_scroll_duration: 1,
   requested_scroll_timescale: 0.75,
-  test_task_count: 10
+  test_task_count: 10,
+  delay_multiplier: 1
 }
 
 let repeat_canceled = false
@@ -186,6 +187,10 @@ ipc.on('message', (event, message) => {
       case "cancel_task":
         repeat_canceled = true
       break;
+      case "delay_multiplier":
+        console.log(`setting delay multiplier to ${ message.value }`)
+        constants.delay_multiplier = Number(message.value)
+      break;
     }
 })
 
@@ -247,7 +252,7 @@ function repeat(params){
         if ( count === current ) {
           on_complete()
         } else {
-          setTimeout( run, delay + Math.random() * rand_delay )
+          setTimeout( run, ( delay + Math.random() * rand_delay ) * constants.delay_multiplier )
         }
     }
   

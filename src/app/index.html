@@ -13,6 +13,7 @@
         outline: none;
         touch-action: manipulation;
         text-transform: uppercase;
+        text-shadow: 3px 3px 0px black;
       }
 
       @keyframes shake {
@@ -74,6 +75,7 @@
         font-family: monospace;
         margin-bottom: 10px;
         animation: shake 15s ease infinite;
+        margin-top: 12px;
       }
 
       .main .container .info .item {
@@ -111,6 +113,14 @@
 
       .main .container button:hover {
         background: #271212;
+      }
+
+      .main input {
+        background: #3333338a;
+        color: #fff;
+        border: 2px solid #a0a0a0;
+        padding: 4px 8px;
+        width: 25%;
       }
 
       .main .overlay {
@@ -159,7 +169,16 @@
         transition: height 0.6s ease;
       }
 
-      
+      .help:after {
+        content: "?";
+        color: rgb(239, 173, 93);
+        position: absolute;
+        transform: translate(50%, -50%) rotate(20deg);
+        font-size: 16px;
+        text-shadow: 3px 2px 0px black;
+        font-weight: 900;
+        font-size: 17px;
+      }
 
       .main .overlay button {
 
@@ -234,18 +253,23 @@
             </div>
             <div class="info">
               <div class="item page_type" v-html="info.page_type"></div>
-              <div class="item invitations" v-html="info.invitations" title="Количество заявок, которые можно принять"></div>
-              <div class="item newcomers" v-html="info.newcomers" title="Количество людей, с которыми можно устновить контакт" ></div>
-              <div class="item skillz" v-html="info.skillz" title="Количество не апвоутнутых скиллов"></div>
-              <div class="item posts" v-html="info.posts" title="Количество постов, которые можно лайкнуть"></div>
+              <div class="item invitations help" v-html="info.invitations" title="Количество заявок, которые можно принять"></div>
+              <div class="item newcomers help" v-html="info.newcomers" title="Количество людей, с которыми можно устновить контакт" ></div>
+              <div class="item skillz help" v-html="info.skillz" title="Количество не апвоутнутых скиллов"></div>
+              <div class="item posts help" v-html="info.posts" title="Количество постов, которые можно лайкнуть"></div>
             </div>
             <div class="buttons">
               <button class="go_to_main">На главную</button>
-              <button class="go_to_main" @click="send_task('quick_scroll')" title="Проскроллить вниз страницы, для того, чтобы инициировать подгрузку">Проскроллить</button>
-              <button class="go_to_main" @click="send_message({ type: 'back' })" title="То же, что и браузерная кнопка 'Назад'">Назад</button>
-              <button class="go_to_main" @click="send_message({ type: 'reload' })" title="То же, что и браузерная кнопка 'Обновить'">Релоад</button>
-              <button class="go_to_main" @click="send_task('next_page')" title="Переход на слудующую страницу - работает, только там, где есть пагинация">Следующая страница</button>
+              <button class="go_to_main  help" @click="send_task('quick_scroll')" title="Проскроллить вниз страницы, для того, чтобы инициировать подгрузку">Проскроллить</button>
+              <button class="go_to_main  help" @click="send_message({ type: 'back' })" title="То же, что и браузерная кнопка 'Назад'">Назад</button>
+              <button class="go_to_main  help" @click="send_message({ type: 'reload' })" title="То же, что и браузерная кнопка 'Обновить'">Релоад</button>
+              <button class="go_to_main  help" @click="send_task('next_page')" title="Переход на слудующую страницу - работает, только там, где есть пагинация">Следующая страница</button>
             </div>
+            <div class="info delay_setup help" title="Управление величиной задержки между повторяющимися действиями (Добавить всех, Лайкнуть всё и т.д.). Применяется во избежание срабатывания анти-флуд контроля. Чем больше число множителя - тем выше задержка">
+              Управление задержкой<br/>
+              <input ref="delay_multiplier" type="phone" value="1" @input="set_delay_multiplier($event.srcElement.value)"/><br/>
+              {{ approx_delay }}
+              </div>
           </div>
           <div class="container" style="background-color: #8e4522">
             <div class="info">Приглашения</div>
@@ -274,6 +298,7 @@
       `,
       data () {
         return {
+          delay_multiplier: 1,
           task: {
             progress: 45,
             active: false
@@ -293,6 +318,11 @@
           }
         }
       },
+      computed: {
+        approx_delay () {
+          return `${0.5 * this.delay_multiplier} - ${1 * this.delay_multiplier} сек.`
+        }
+      },
       mounted () {
         console.log("mounted")
         this.send_message( {
@@ -301,6 +331,7 @@
       },
       methods: {
         send_task ( task_type ) {
+          send_message( { type: "delay_multiplier", value: this.delay_multiplier } )
           send_message( {
             type: "task",
             task_type: task_type,
@@ -330,6 +361,12 @@
           } else {
             this.task.active = true
           }
+        },
+        set_delay_multiplier ( value ) {
+          value = value.match(/[+-]?\d+(\.\d+)?/g)
+          this.delay_multiplier = value
+          this.send_message({ type: 'delay_multiplier', value: value })
+          // this.$refs.delay_multiplier.value = value
         }
       }
      })
