@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^9.0.4",
+    "electron": "^18.3.7",
     "lodash": "^4.17.15",
     "gsap": "latest",
     "vue": "latest"
